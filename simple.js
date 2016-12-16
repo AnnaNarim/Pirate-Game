@@ -310,6 +310,7 @@ let update = function (modifier) {
 
 
 			lifes[lifecount-1].src = deathImage.src;
+			ctx.drawImage(deathImage, lifes[lifecount-1].x, lifes[lifecount-1].y);
 			hx=hero.x;
 			hy=hero.y;
 
@@ -325,6 +326,7 @@ let update = function (modifier) {
 			audioElement.currentTime = 0.5;
             audioElement.play();
 			lifes[lifecount-1].src = deathImage.src;
+			ctx.drawImage(deathImage, lifes[lifecount-1].x, lifes[lifecount-1].y);
 			hx=hero.x;
 			hy=hero.y;
 			reset(hx,hy);
