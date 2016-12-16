@@ -1,19 +1,8 @@
-//<script type="text/javascript" src="jquery.js"></script>
-
-//1. Haruti kyanqnery (3 kyanq)
-//2. timery prcni (bombin kpni)  game over lini (kyanqery qchana) u verjum knopka lini NEW GAME-i hamar 
-//3. game overy alert chlini 
-//4. Haruti parely amen hajoxak xorovac havaqeluc heto 
-//5. bombery irar vra chlinen
-//6. timeri alettic heto noric sksel xaxy 
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-let hx=50;
-let hy=100;
-
-let lifecount=3;
+//////////////////////// Loading all images
 
 let bgReady = false;
 let bgImage = new Image();
@@ -64,28 +53,7 @@ lifeImage.onload = function () {
 	lifeReady = true;
 };
 lifeImage.src = "rsz_1rsz_hero.png";
-/*
- let life1Ready = false;
-let life1Image = new Image();
-life1Image.onload = function () {
-	life1Ready = true;
-};
-life1Image.src = "rsz_1rsz_hero.png";
 
- let life2Ready = false;
-let life2Image = new Image();
-life2Image.onload = function () {
-	life2Ready = true;
-};
-life2Image.src = "rsz_1rsz_hero.png";
-
- let life3Ready = false;
-let life3Image = new Image();
-life3Image.onload = function () {
-	life3Ready = true;
-};
-life3Image.src = "rsz_1rsz_hero.png";
-*/
 let deathReady = false;
 let deathImage = new Image();
 deathImage.onload = function () {
@@ -93,17 +61,89 @@ deathImage.onload = function () {
 };
 
 deathImage.src = "rsz_rsz_1rsz_heroblack.png";
-   
-// Game objects
+
+let img1 = new Image();
+		img1.src = "expl.png";
+		
+
+
+////////////////////////////////////////////////
+let explo = false;
+
+let hx=50;
+let hy=100;
+
+let lifecount=3;
+let monstersCaught=0;
+let caught=3;
+let win=false;
+
+let over=false;
+let timeover=false;
+
+let then= Date.now();
+let sTime= new Date().getTime();
+//let countDown=30;
+let countd=30;
+let counter= setInterval(UpdateTime, 500);
+let levelchange = false;
+
+// initialization
+let init = function(){
+hx=50;
+hy=100;
+
+countd=30;
+
+ lifecount=3;
+monstersCaught=0;
+
+caught=3;
+ win=false;
+
+ over=false;
+ timeover=false;
+
+ levelchange= false;
+
+countDown=30;
+then= Date.now();
+ sTime= new Date().getTime();
+ counter= setInterval(UpdateTime, 500);
+};
+
+let NewGame = function(){
+	let w = window;
+	requestAnimationFrame = w.requestAnimationFrame ;
+	
+	init();
+	//then = Date.now();
+
+	UpdateTime(countd);
+	counter = setInterval(UpdateTime, 500);
+
+	lifes.forEach(function(life){
+		life.src = "rsz_1rsz_hero.png";
+	});
+
+	reset(hx,hy);
+	main();
+
+};
+// Game objects hero, monster, bombs
 let hero = {
 	speed: 256, // movement in pixels per second
 	x: 0,
-	y: 0
+	y: 0,
+	width:80,
+	height:100
 	
 };
 let monster = {
 	x: 0,
-	y: 0
+	y: 0,
+	width:71,
+	height:100
 	
 };
 let bomb = {
@@ -112,20 +152,17 @@ let bomb = {
 	x2: 45,
 	y2: 96,
 	x3: 45,
-	y3: 96
+	y3: 96,
+	width1:50,
+	height1:50,
+	width2:50,
+	height2:50,
+	width3:50,
+	height3:50
 	
 };
-/*
-let life = {
-	x1: 10,
-	y1: 10,
-	x2: 50,
-	y2: 10,
-	x3: 90,
-	y3: 10
-	
-};*/
 
+// lives of hero
 let life1 = {
 	x: 10,
 	y: 10,
@@ -141,17 +178,23 @@ let life3 = {
 	y: 10,
 	src: lifeImage.src
 }
+
+// Drawing lives
+
 let lifes = [life1,life2,life3];
-function nkariLIfe(){
+function drawLife(){
 	lifes.forEach(function(lifePic){
 		let img = new Image();
 		img.src = lifePic.src;
 		ctx.drawImage(img,lifePic.x,lifePic.y);
 	});
 }
-let monstersCaught = 0;
 
-// Handle keyboard controls
+let audioElement = document.createElement('audio');
+    audioElement.setAttribute('src', 'explode.mp3');
+
+
+// keyboard controls
 let keysDown = {};
 
 addEventListener("keydown", function (e) {
@@ -162,64 +205,57 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
+// Are two objects overlap/touch
+
 const hitTest = function(a, b) {	
-	
-	return hero.x <= (monster.x +71)&& monster.x <= (hero.x +80)&& hero.y <= (monster.y + 100)&& monster.y <= (hero.y +100); // false
+	return a.x <= (b.x +b.width) && b.x <= (a.x +a.width) && a.y <= (b.y + b.height) && b.y <= (a.y + a.height); 
 };
 
-// Reset the game when the player catches a monster
+// Reset the game when hero caught monster; hero tauched bombs
+
 let reset = function (a,b) {
+
+	//init();
 	hero.x = hx;
 	hero.y = hy;
 	
 
 	do {
-		// Throw the monster somewhere on the screen randomly
-		monster.x =(Math.random() * (canvas.width - 71));
-		monster.y = (Math.random() * (canvas.height - 100));	
+		monster.x =(Math.random() * (canvas.width - monster.width));
+		monster.y = (Math.random() * (canvas.height - monster.height));	
 	
-	//????????????????????????????????????
 	} while(hitTest(hero, monster)) ;
 	
+	do{
+		bomb.x1 =(Math.random() * (canvas.width - bomb.width1));
+		bomb.y1 = (Math.random() * (canvas.height - bomb.height1));
+	} while(hitTest(monster, bomb) && hitTest(hero, bomb)) ;
+
+	/*do{
+		bomb.x2 =(Math.random() * (canvas.width - bomb.width2));
+		bomb.y2 = (Math.random() * (canvas.height - bomb.height2));
+	} while(hitTest(monster, bomb) && hitTest(hero, bomb))  ;
+		
+	do{
+		bomb.x3 =(Math.random() * (canvas.width - bomb.width3));
+		bomb.y3= (Math.random() * (canvas.height -bomb.height3));
+	} while(hitTest(monster, bomb) && hitTest(hero, bomb));
+	*/
 	
-	
-	monster.x =(Math.random() * (canvas.width - 71));
-	monster.y = (Math.random() * (canvas.height - 100));
-	
-	bomb.x1 =(Math.random() * (canvas.width - 50));
-	bomb.y1 = (Math.random() * (canvas.height - 50));
-	
-	//???????????????????????????????????
-	
-	while(monster.x <= (bomb.x1 +50)&& bomb.x1 <= (monster.x +71)&& monster.y <= (bomb.y1 + 50)&& bomb.y1 <= (monster.y + 100)){
-		bomb.x1 =(Math.random() * (canvas.width - 50));
-	bomb.y1 = (Math.random() * (canvas.height - 50));
-	}
-	
-	while(hero.x <= (bomb.x1 +50)&& bomb.x1 <= (hero.x + 80)&& hero.y <= (bomb.y1 + 50)&&bomb.y1 <= (hero.y +100)) {
-		bomb.x1 =(Math.random() * (canvas.width - 50));
-	bomb.y1 = (Math.random() * (canvas.height - 50));
-	}
-	
-	//	bomb.x2 =(Math.random() * (canvas.width - 50));
-	//bomb.y2 = (Math.random() * (canvas.height - 50));
-	
-	//	bomb.x3 =(Math.random() * (canvas.width - 50));
-	//bomb.y3 = (Math.random() * (canvas.height - 50));
-	
-//UpdateTime();
 	};
-let over = false;
+
+over = false;
+
 function gameOver(over){
 	if(over){
 		render();
 		let gameOverImage = new Image();
 		gameOverImage.src = "gameOver.png";
-		ctx.drawImage(gameOverImage, 350, 100);
-		
+		ctx.drawImage(gameOverImage, 350, 100);		
 	}
 }
-let timeover = false;
+
+timeover = false;
 function timeOver(timeover){
 	if(timeover){
 		render();
@@ -232,55 +268,72 @@ function timeOver(timeover){
 // Update game objects
 let update = function (modifier) {
 
-	if (38 in keysDown && hero.y>=0) { // Player holding up
+	if (38 in keysDown && hero.y>=0) { //key up
 		hero.y -= hero.speed * modifier;
 	}
-	if (40 in keysDown && (hero.y+100<=canvas.height)) { // Player holding down
+	if (40 in keysDown && (hero.y+100<=canvas.height)) { //key down
 		hero.y += hero.speed * modifier;
 	}
-	if (37 in keysDown&& hero.x>=0) { // Player holding left
+	if (37 in keysDown&& hero.x>=0) { //key left
 		heroImage = hero1Image;
 		ctx.drawImage(heroImage, hero.x, hero.y);
 			hero.x -= hero.speed * modifier;
-
 	}
-	if (39 in keysDown&& (hero.x+71<=canvas.width)) { // Player holding right
+	if (39 in keysDown&& (hero.x+71<=canvas.width)) { //key right
 		heroImage = hero2Image;
 		ctx.drawImage(heroImage, hero.x, hero.y);
 			hero.x += hero.speed * modifier;
 	}
 
-
-	
-	if (hero.x <= (monster.x +61)&& monster.x <= (hero.x + 70)&& hero.y <= (monster.y + 90)&& monster.y <= (hero.y +90)) {
+	if(hitTest(hero,monster)){
 		++monstersCaught;
 		hx=hero.x;
 		hy=hero.y;
 		reset(hx,hy);
 	}
 	
+
 	if (hero.x <= (bomb.x1 +45)&& bomb.x1 <= (hero.x + 75)&& hero.y <= (bomb.y1 + 45)&& bomb.y1 <= (hero.y + 75)) {
+
+		let bx=bomb.x1;
+		let by=bomb.y1;
 	
+			explo= {
+				x1:bx,
+				y1:by
+			};	
 		
-			if(lifecount===3){			
-			//life1Image=deathImage;
-			//ctx.drawImage(life1Image, life.x1, life.y1);
+		//ctx.drawImage(img1,bx+45,by+45,50,50);
+		if(lifecount===3){	
+		audioElement.currentTime = 0.5;
+		audioElement.play();
+
+
 			lifes[lifecount-1].src = deathImage.src;
-		hx=hero.x;
-		hy=hero.y;
-		reset(hx,hy);
-		lifecount=2;
+			hx=hero.x;
+			hy=hero.y;
+
+			setTimeout(function(){
+    			reset(hx,hy);
+			},3);
+
+			//reset(hx,hy);
+			lifecount=2;
 		}
+
 		else if(lifecount===2){
-			//life2Image=deathImage;
-			//ctx.drawImage(life2Image, life.x2, life.y2);
+			audioElement.currentTime = 0.5;
+            audioElement.play();
 			lifes[lifecount-1].src = deathImage.src;
-		hx=hero.x;
-		hy=hero.y;
-		reset(hx,hy);
-		lifecount=1;
+			hx=hero.x;
+			hy=hero.y;
+			reset(hx,hy);
+			lifecount=1;
 		}
+
 		else{
+			audioElement.currentTime = 0.5;
+            audioElement.play();
 			lifes[lifecount-1].src = deathImage.src;
 			ctx.drawImage(deathImage, lifes[lifecount-1].x, lifes[lifecount-1].y);
 			
@@ -295,38 +348,7 @@ let update = function (modifier) {
 
 	}
 	
-/*	if (hero.x <= (bomb.x2 + 50)&& bomb.x2 <= (hero.x + 50)&& hero.y <= (bomb.y2 + 50)&& bomb.y2 <= (hero.y + 50)) {
-				while (lifecount!=0){
-			
-			lifeImage=deathImage;
-			ctx.drawImage(lifeImage, life.x2, life.y2);
-				hx=hero.x;
-		hy=hero.y;
-		reset(hx,hy);
-		lifecount--;
-		}
-		
-			//alert("Game over");
-		//$("gameover").show();
-	
-	}
-	
-	if (hero.x <= (bomb.x3 + 50)&& bomb.x3 <= (hero.x + 50)&& hero.y <= (bomb.y3 +50)&& bomb.y3 <= (hero.y + 50)) {
-		while (lifecount!=0){
-			
-			lifeImage=deathImage;
-			ctx.drawImage(lifeImage, life.x3, life.y3);
-				hx=hero.x;
-		hy=hero.y;
-		reset(hx,hy);
-		lifecount--;
-		}
-		
-			//alert("Game over");
-	
-		//$("gameover").show();
-	
-	}*/
+
 };
 
 
@@ -343,14 +365,22 @@ let render = function () {
 		ctx.drawImage(monsterImage, monster.x, monster.y);
 	}
 
-	
 	if (bombReady) {
-		ctx.drawImage(bombImage, bomb.x1, bomb.y1);
+
+		if(explo) {
+			ctx.drawImage(img1, explo.x1, explo.y1,80,80);	
+			setTimeout(function(){
+				explo = false;
+			}, 3000)
+			
+		}
+		ctx.drawImage(bombImage, bomb.x1, bomb.y1,50,50);	
+		
 		//ctx.drawImage(bombImage, bomb.x2, bomb.y2);
 		//ctx.drawImage(bombImage, bomb.x3, bomb.y3);
 	}	
 	
-	nkariLIfe();
+	drawLife();
 	
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
@@ -362,6 +392,7 @@ let render = function () {
 
 //The main game loop
 let main = function () {
+
 	if(!over && !timeover){
 		let now = Date.now();
 		let delta = now - then;
@@ -369,39 +400,65 @@ let main = function () {
 		update(delta / 1000);
 		render();
 
+		
+		if(monstersCaught===caught && countDown!==0){
+			if(countDown<=10){
+				win=true;
+			}
+			else{
+			levelchange= true;
+			monstersCaught = 0;
+			caught +=1;
+			countDown-=10;
+			then= Date.now();
+ 			sTime= new Date().getTime();
+
+			UpdateTime(countd);
+			}
+		}
+
 		then = now;
-		// Request to do this again ASAP
+		
 		requestAnimationFrame(main);
-	
-	}else if(timeover){
+
+	} else if(timeover && !win){
 		let timeupImage = new Image();
 		timeupImage.src = "time.png";
 		ctx.drawImage(timeupImage, 350, 100);
-	}else{
+	}
+	else{
 		let gameOverImage = new Image();
 		gameOverImage.src = "gameOver.png";
 		ctx.drawImage(gameOverImage, 350, 100);
 		
 	}
-	
-	
+
+	if(levelchange){
+		let levelUp = new Image();
+			levelUp.src = "levelup.png";
+			ctx.drawImage(levelUp,420,80,200,250);
+
+			setTimeout(function(){
+
+				levelchange= false;
+			}, 1000);
+	}
+
+	if(win){
+			let winImage = new Image();
+			winImage.src = "win.png";
+			ctx.drawImage(winImage,420,180);
+	}
 };
-// Cross-browser support for requestAnimationFrame
-let w = window;
-requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+
+NewGame();
+
+sTime = new Date().getTime();
 
 
-// Let's play this game!
-let then = Date.now();
-reset();
+function UpdateTime(countdown) {
+	//init();
 
-main();
-
-let sTime = new Date().getTime();
-let countDown =3;
-
-
-function UpdateTime() {
     let cTime = new Date().getTime();
     let diff = cTime - sTime;
     let seconds = countDown - Math.floor(diff / 1000);
@@ -411,35 +468,14 @@ function UpdateTime() {
         $("#minutes").text(minutes < 10 ? "0" + minutes : minutes);
         $("#seconds").text(seconds < 10 ? "0" + seconds : seconds);
     } else {
-       $("#countdown").hide();
+       //$("#countdown").hide();
 		timeover=true;
         clearInterval(counter);
     }
 }
-UpdateTime();
-let counter = setInterval(UpdateTime, 500);
 
  $('#new_game').on("click",function(){
-	lifes.forEach(function(life){
-		life.src = "rsz_1rsz_hero.png";
-	});
-	
-	monstersCaught = 0;
-	
-	hx=50;
-	hy=100;
-	
-	over = false;
-	timeover = false;
-	
-	then = Date.now();
-	sTime = new Date().getTime();
-	countDown = 3;
-	UpdateTime();
-	counter = setInterval(UpdateTime, 500);
-	
-	
-	reset();
-	main();
+	NewGame();
+
  });
  
