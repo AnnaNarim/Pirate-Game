@@ -64,7 +64,8 @@ deathImage.src = "rsz_rsz_1rsz_heroblack.png";
 let img1 = new Image();
 		img1.src = "expl.png";
 		
-
+let timeup = new Image();
+		timeup.src = "time.png";
 
 ////////////////////////////////////////////////
 let explo = false;
@@ -89,26 +90,26 @@ let levelchange = false;
 
 // initialization
 let init = function(){
-hx=50;
-hy=100;
+	hx=50;
+	hy=100;
 
-countDown=30;
+	countDown=30;
 
- lifecount=3;
-monstersCaught=0;
+	 lifecount=3;
+	monstersCaught=0;
 
-caught=3;
- win=false;
+	caught=3;
+	 win=false;
 
- over=false;
- timeover=false;
+	 over=false;
+	 timeover=false;
 
- levelchange= false;
+	 levelchange= false;
 
-//countDown=10;
-then= Date.now();
- sTime= new Date().getTime();
- counter= setInterval(UpdateTime, 500);
+	//countDown=10;
+	then= Date.now();
+	 sTime= new Date().getTime();
+	 counter= setInterval(UpdateTime, 500);
 };
 
 let NewGame = function(){
@@ -403,10 +404,11 @@ let main = function () {
 
 		
 		if(monstersCaught===caught && countDown!==0){
-			if(monstersCaught===10){
+			if(monstersCaught===5){
 				win=true;
 			}
 			else{
+				 
 			levelchange= true;
 			monstersCaught = 0;
 			caught +=1;
@@ -423,8 +425,6 @@ let main = function () {
 		requestAnimationFrame(main);
 
 	} else if(timeover && !win){
-		let timeup = new Image();
-		timeup.src = "time.png";
 		ctx.drawImage(timeup, 350, 100);
 	}
 	else{
@@ -454,8 +454,8 @@ let main = function () {
 
 NewGame();
 
-sTime = new Date().getTime();
 
+sTime = new Date().getTime();
 
 function UpdateTime(countdown) {
 	//init();
