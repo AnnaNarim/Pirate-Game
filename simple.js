@@ -1,4 +1,3 @@
-
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
@@ -9,7 +8,7 @@ let bgImage = new Image();
 bgImage.onload = function () {
 	bgReady = true;
 };
-bgImage.src = "background-1024x524.png";
+bgImage.src = "back1.jpg";
 
  let heroReady = false;
 let heroImage = new Image();
@@ -83,8 +82,8 @@ let timeover=false;
 
 let then= Date.now();
 let sTime= new Date().getTime();
-//let countDown=30;
-let countd=30;
+let countDown=30;
+//let countd=10;
 let counter= setInterval(UpdateTime, 500);
 let levelchange = false;
 
@@ -93,7 +92,7 @@ let init = function(){
 hx=50;
 hy=100;
 
-countd=30;
+countDown=30;
 
  lifecount=3;
 monstersCaught=0;
@@ -106,7 +105,7 @@ caught=3;
 
  levelchange= false;
 
-countDown=30;
+//countDown=10;
 then= Date.now();
  sTime= new Date().getTime();
  counter= setInterval(UpdateTime, 500);
@@ -119,7 +118,7 @@ let NewGame = function(){
 	init();
 	//then = Date.now();
 
-	UpdateTime(countd);
+	UpdateTime(countDown);
 	counter = setInterval(UpdateTime, 500);
 
 	lifes.forEach(function(life){
@@ -254,7 +253,7 @@ function gameOver(over){
 		ctx.drawImage(gameOverImage, 350, 100);		
 	}
 }
-
+/*
 timeover = false;
 function timeOver(timeover){
 	if(timeover){
@@ -264,7 +263,7 @@ function timeOver(timeover){
 		ctx.drawImage(timeupImage, 350, 100);
 	}
 }
-
+*/
 // Update game objects
 let update = function (modifier) {
 
@@ -356,7 +355,7 @@ let update = function (modifier) {
 
 let render = function () {
 	if (bgReady) {
-		ctx.drawImage(bgImage, 0, 0);
+		ctx.drawImage(bgImage, 0, 0,1024,524);
 	}
 
 	if (heroReady) {
@@ -404,7 +403,7 @@ let main = function () {
 
 		
 		if(monstersCaught===caught && countDown!==0){
-			if(countDown<=10){
+			if(monstersCaught===10){
 				win=true;
 			}
 			else{
@@ -415,7 +414,7 @@ let main = function () {
 			then= Date.now();
  			sTime= new Date().getTime();
 
-			UpdateTime(countd);
+			UpdateTime(countDown);
 			}
 		}
 
@@ -424,9 +423,9 @@ let main = function () {
 		requestAnimationFrame(main);
 
 	} else if(timeover && !win){
-		let timeupImage = new Image();
-		timeupImage.src = "time.png";
-		ctx.drawImage(timeupImage, 350, 100);
+		let timeup = new Image();
+		timeup.src = "time.png";
+		ctx.drawImage(timeup, 350, 100);
 	}
 	else{
 		let gameOverImage = new Image();
@@ -480,4 +479,3 @@ function UpdateTime(countdown) {
 	NewGame();
 
  });
- 
