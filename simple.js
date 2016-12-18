@@ -98,7 +98,7 @@ let init = function(){
 	 lifecount=3;
 	monstersCaught=0;
 
-	caught=3;
+	caught=5;
 	 win=false;
 
 	 over=false;
@@ -404,14 +404,14 @@ let main = function () {
 
 		
 		if(monstersCaught===caught && countDown!==0){
-			if(monstersCaught===5){
+			if(monstersCaught===9){
 				win=true;
 			}
 			else{
 				 
 			levelchange= true;
 			monstersCaught = 0;
-			caught +=1;
+			caught +=2;
 			countDown-=10;
 			then= Date.now();
  			sTime= new Date().getTime();
