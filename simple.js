@@ -67,6 +67,9 @@ let img1 = new Image();
 let timeup = new Image();
 		timeup.src = "time.png";
 
+let gameOverImage = new Image();
+		gameOverImage.src = "gameOver.png";
+
 ////////////////////////////////////////////////
 let explo = false;
 
@@ -428,8 +431,7 @@ let main = function () {
 		ctx.drawImage(timeup, 350, 100);
 	}
 	else{
-		let gameOverImage = new Image();
-		gameOverImage.src = "gameOver.png";
+		
 		ctx.drawImage(gameOverImage, 350, 100);
 		
 	}
